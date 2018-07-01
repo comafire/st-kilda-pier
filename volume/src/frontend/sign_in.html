@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>St. Kilda Pier</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/vuex"></script>
+  <script src="https://unpkg.com/vuejs-storage"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div id="SignIn">
+      <div class="w3-container w3-teal">
+          <div class="w3-container w3-left w3-xxlarge">
+            St. Kilda Pier
+          </div>
+      </div>
+
+        <div class="w3-panel">
+          <div class="w3-container">
+            <p>
+              <label>ID</label>
+              <input type="text" class="w3-input" title="ID" v-model="id"/>
+              <label>PW</label>
+              <input type="password" class="w3-input" title="PW" v-model="pw" v-on:keyup.enter="signIn"/>
+            </p>
+            <button class="w3-btn w3-round w3-teal" v-on:click="signIn">SignIn</button>
+          </div>
+        </div>
+    </div>
+
+    <script src="js/store.js"></script>
+    <script src="js/sign_in.js"></script>
+</body>
+</html>

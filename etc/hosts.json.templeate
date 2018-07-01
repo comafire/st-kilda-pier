@@ -1,0 +1,56 @@
+{
+  "c01" : {
+    "ipv4" : "192.168.0.1",
+    "labels" : [
+        {"registry" : "enable"},
+        {"jupyter" : "enable"},
+        {"spark-master" : "enable"},
+        {"portainer" : "enable"},
+        {"airflow" : "enable"},
+        {"mysql" : "enable"},
+        {"zookeeper" : "enable"},
+        {"kafka" : "enable"},
+        {"flask" : "enable"},
+        {"nginx" : "enable"}
+    ],
+    "groups" : ["master", "manager"]
+  },
+  "c02" : {
+    "ipv4" : "192.168.0.2",
+    "labels" : [
+        {"registry" : "enable"},
+        {"spark-worker" : "enable"},
+        {"zookeeper" : "enable"},
+        {"kafka" : "enable"}
+    ],
+    "groups" : ["manager"]
+  },
+  "c03" : {
+    "ipv4" : "192.168.0.3",
+    "labels" : [
+        {"registry" : "enable"},
+        {"spark-worker" : "enable"},
+        {"zookeeper" : "enable"},
+        {"kafka" : "enable"}
+    ],
+    "groups" : ["manager"]
+  },
+  "c04" : {
+    "ipv4" : "192.168.0.4",
+    "labels" : [
+        {"registry" : "enable"},
+        {"spark-worker": "enable"},
+        {"kafka" : "enable"}
+    ],
+    "groups" : ["worker"]
+  },
+  "c05" : {
+    "ipv4" : "192.168.50.5",
+    "labels" : [
+        {"registry" : "enable"},
+        {"spark-worker" : "enable"},
+        {"kafka" : "enable"}
+    ],
+    "groups" : ["worker"]
+  }
+}

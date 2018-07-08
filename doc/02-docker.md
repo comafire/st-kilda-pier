@@ -2,9 +2,9 @@
 
 Docker 에서는 Machine/Swarm/Compose 를 통해 편리한 서버 관리를 제공해 줍니다.
 
-SKP 에서는 Volume 설정에 FUSE를 사용함에 있어, privileged 권한이 필요하지만, 현재 Swarm/Compose 에서는 제공하고 있지 않아 현재는 Docker만을 사용하여 Container를 관리합니다.
+SKP 에서는 Volume 설정에 FUSE를 사용함에 있어, privileged 권한이 필요하지만, 현재까지는 Swarm/Compose 에서는 제공하고 있지 않아 Docker만을 사용하여 Container를 관리하고 있습니다.
 
-Docker Image의 경우 Master 노드에서 빌드 후 각 노드에 local registry를 이용하여 이미지는 공유합니다.
+Docker Image의 경우 Master 노드에서 빌드 후 공유 스토리지를 이용하여 각 노드에 local registry와 이미지를 공유합니다.
 
 ## Setup Swarm
 
@@ -19,7 +19,7 @@ Swarm Manager 와 Worker 노드 설정은 $SKP_HOME/etc/hosts.json 파일의 gro
 ```
 {
   "c01" : {
-    "ipv4" : "192.168.50.1",
+    "ipv4" : "192.168.0.1",
     "labels" : [
         {"registry" : "enable"},      
         {"jupyter" : "enable"},
@@ -30,15 +30,15 @@ Swarm Manager 와 Worker 노드 설정은 $SKP_HOME/etc/hosts.json 파일의 gro
     "groups" : ["master", "manager"]
   },
   "c02" : {
-    "ipv4" : "192.168.50.2",
+    "ipv4" : "192.168.0.2",
     "labels" : [
         {"spark-worker" : "enable"}
     ],
     "groups" : ["manager"]
   },
   ...
-  "c10" : {
-    "ipv4" : "192.168.50.10",
+  "c05" : {
+    "ipv4" : "192.168.0.5",
     "labels" : [
         {"spark-worker":"enable"}
     ],
@@ -50,10 +50,10 @@ Swarm Manager 와 Worker 노드 설정은 $SKP_HOME/etc/hosts.json 파일의 gro
 설정 후 아래 명령을 통해 swarm을 구성하고 ingress network를 구성합니다.
 
 ```
-./fab.sh docker_swarm_init
-./fab.sh docker_swarm_join
-./fab.sh docker_swarm_label
-./fab.sh docker_swarm_network
+./skp.sh docker_swarm_init
+./skp.sh docker_swarm_join
+./skp.sh docker_swarm_label
+./skp.sh docker_swarm_network
 ```
 
 올바르게 구성되었다면 Master 노드에서 docker network ls 명령으로 swarm ingress network 를 보실수 있습니다.
@@ -72,7 +72,7 @@ k2k3p1j7l253        swarm-skp           overlay             swarm
 local registry는 모든 노드에서 수행되며 Master의 build image를 공유하게 됩니다.
 
 ```
-./fab.sh docker_run_registry
+./skp.sh docker_run_registry
 ```
 
 주의사항
@@ -82,6 +82,7 @@ filesystem layer verification failed for digest sha256:c3d73fc284d6c3350a83cd512
 ```
 
 local registry 에서 image 를 pull 할때 위와 같은 sha digest 에러가 날 경우 시스템 DNS 설정이 제대로 되지 않아 타임 동기화 문제로 발생할 가능성이 높습니다.
+
 DNS 설정과 시스템 시간을 확인해 주세요.
 
 ## Build Image
@@ -93,13 +94,17 @@ DNS 설정과 시스템 시간을 확인해 주세요.
 * skp/docker-ds-gpu: Data Science for GPU
 
 ```
-./fab.sh docker_build --set LOCALE="ko_KR.UTF-8",GPU="FALSE",NAME="skp/docker-ds",IMAGE="skp/docker-ds",TAG="latest"
-./fab.sh docker_build --set LOCALE="ko_KR.UTF-8",GPU="TRUE",NAME="skp/docker-ds",IMAGE="skp/docker-ds-gpu",TAG="latest"
+./skp.sh docker_build --set LOCALE="ko_KR.UTF-8",GPU="FALSE",NAME="skp/docker-ds",IMAGE="skp/docker-ds",TAG="latest"
+./skp.sh docker_build --set LOCALE="ko_KR.UTF-8",GPU="TRUE",NAME="skp/docker-ds",IMAGE="skp/docker-ds-gpu",TAG="latest"
 ```
 
 ## Setup Data Volume
 
 Data를 읽고/쓰기 위한 외부 Volume 과의 연동을 위해 SKP 에서는 FUSE를 사용하여 SSH, AWS S3, Azure Blob 과의 연동을 지원합니다.
+
+해당 Volume 은 Docker Container 내부에서 Container 기동시 마운트됩니다.
+
+외부 네트워크를 사용하기에 네트워크 전송 속도가 낮으므로, 같은 망에서 네트워크 속도가 충분하지 않다면 Spark Cluster의 작업디렉토리로의 직접적인 사용은 추천하지 않습니다.
 
 ## SSHFS
 
@@ -114,13 +119,13 @@ export SSHFS_VOLUME="/home/sshfs"
 접속을 위한 Key를 생성합니다. 기본적으로 $SKP_HOME/volume/etc/ssh에 생성됩니다.
 
 ```
-./fab.sh sshfs_keygen
+./skp.sh sshfs_keygen
 ```
 
 생성된 키를 해당 서버에 복사합니다.
 
 ```
-./fab.sh sshfs_copy_id --set SSHFS_PASSWD="YOUR PASSWORD"
+./skp.sh sshfs_copy_id --set SSHFS_PASSWD="YOUR PASSWORD"
 ```
 
 ## S3FS
@@ -134,7 +139,7 @@ export S3_ACCESS_KEY="YOUR_ACCESS_KEY"
 ```
 
 ```
-./fab.sh s3fs_init
+./skp.sh s3fs_init
 ```
 
 ## BLOBFS
@@ -148,7 +153,7 @@ export BLOB_CONTAINER_NAME="YOUR_CONTAINER_NAME"
 ```
 
 ```
-./fab.sh blobfs_init
+./skp.sh blobfs_init
 ```
 
 # Run Jupyter
@@ -162,7 +167,7 @@ export JUPYTER_PORT="8110" # Jupyter Port
 export JUPYTER_VOLUME=$SKP_HOME/volume # Jupyter Volume Path
 export JUPYTER_PASSWORD="jupyter-pw" # Jupyter Password
 
-export JUPYTER_BASEURL="jupyter-skp" # Jupyter BaseURL, ex) http://localhost:8010/jupyter
+export JUPYTER_BASEURL="jupyter-skp" # Jupyter BaseURL, ex) http://localhost:8110/jupyter-skp
 export JUPYTER_RESTAPIPORT="8120" # Jupyter Kernel Gateway Port
 export JUPYTER_DOCKER="docker" # Docker Command
 export JUPYTER_IMAGE="skp/docker-ds" # Docker Image Name
@@ -175,7 +180,7 @@ export JUPYTER_GPU="TRUE"
 다음 명령을 통해 Jupyter Container를 실행할 수 있습니다.
 
 ```
-./fab.sh docker_run_jupyter
+./skp.sh docker_run_jupyter
 ```
 
 # Run Spark
@@ -216,8 +221,8 @@ export SPARK_GPU="FALSE"
     "groups" : ["manager"]
   },
   ...
-  "c10" : {
-    "ipv4" : "192.168.50.10",
+  "c05" : {
+    "ipv4" : "192.168.0.5",
     "labels" : [
         ...
         {"spark-worker":"enable"}
@@ -228,7 +233,7 @@ export SPARK_GPU="FALSE"
 ```
 
 ```
-./fab.sh docker_run_spark
+./skp.sh docker_run_spark
 ```
 
 # Run Airflow
@@ -238,13 +243,13 @@ export SPARK_GPU="FALSE"
 Airflow 를 위한 저장소로 MySQL 을 사용합니다. 아래 명령으로 MySQL 을 실행 할 수 있습니다.
 
 ```
-./fab.sh docker_run_mysql
+./skp.sh docker_run_mysql
 ```
 
 mysql client 를 통해서 MySQL 컨테이너에 접속하고 싶다면, 아래 명령을 이용하면 됩니다. 암호는 env.sh 파일에 설정된 암호입니다.
 
 ```
-./fab.sh docker_exec_mysql
+./skp.sh docker_exec_mysql
 ```
 
 ## Init MySQL
@@ -252,8 +257,8 @@ mysql client 를 통해서 MySQL 컨테이너에 접속하고 싶다면, 아래 
 Airflow를 위한 DB 초기화를 진행합니다.
 
 ```
-./fab.sh docker_init_airflow_mysql
-./fab.sh docker_init_airflow_db
+./skp.sh docker_init_airflow_mysql
+./skp.sh docker_init_airflow_db
 ```
 
 ## Run Airflow
@@ -278,7 +283,7 @@ export AIRFLOW_GPU="FALSE"
 ```
 
 ```
-./fab.sh docker_run_airflow
+./skp.sh docker_run_airflow
 ```
 
 ## Setup Airflow Web Admin Password
@@ -293,7 +298,7 @@ user.password = unicode("YOUR_PASSWORD", "utf-8")
 아래 명령을 통하여 Airflow 컨테이너 안에서 초기화 코드를 실행합니다.
 
 ```
-./fab.sh docker_init_airflow_web_passwd
+./skp.sh docker_init_airflow_web_passwd
 ```
 
 이제 설정한 암호를 통해 Airflow Web UI 에 접속할 수 있습니다.
@@ -310,7 +315,7 @@ export PORTAINER_PW="admin-pw"
 ```
 
 ```
-./fab.sh docker_run_portainer
+./skp.sh docker_run_portainer
 ```
 
 ## Run Zookeeper
@@ -339,7 +344,7 @@ $SKP_HOME/etc/hosts.json 에서 적용할 노드에 label 을 설정해 줍니�
 ```
 
 ```
-./fab.sh docker_run_zookeeper
+./skp.sh docker_run_zookeeper
 ```
 
 ## Run Kafka
@@ -368,7 +373,7 @@ $SKP_HOME/etc/hosts.json 에서 적용할 노드에 label 을 설정해 줍니�
 ```
 
 ```
-./fab.sh docker_run_kafka
+./skp.sh docker_run_kafka
 ```
 
 테스트
@@ -410,7 +415,7 @@ hello world!!
 SKP 에서 사용될 Web Admin 페이지를 위한 실행으로 개발 중입니다.
 
 ```
-./fab.sh docker_run_nginx --set NAME="nginx-skp",PORT="7160",VOLUME="/root/volume"
+./skp.sh docker_run_nginx --set NAME="nginx-skp",PORT="7160",VOLUME="/root/volume"
 ```
 
 ## Run Flask
@@ -419,5 +424,5 @@ SKP 에서는 Backend Restful API 를 위한 공통 인증으로 JSON Web Token 
 개별 Restful API를 서비스하는 프로젝트에서 공통 인증 방식으로 사용할 시에 사용가능합니다.
 
 ```
-./fab.sh docker_run_flask --set NAME="flask-skp",PORT="7170",VOLUME="/root/volume"
+./skp.sh docker_run_flask --set NAME="flask-skp",PORT="7170",VOLUME="/root/volume"
 ```

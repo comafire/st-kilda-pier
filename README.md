@@ -25,8 +25,8 @@ Support Docker Container
 클러스터 설치에 대한 자세한 사항은 doc 디렉토리 안에 Markdown 파일을 참조하세요.
 
 Document
-* 01-cluster.md
-* 02-docker.md
+* [01-cluster.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/01-cluster.md)
+* [02-docker.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/02-docker.md)
 
 SKP 를 이용하여 Data Science Project 를 진행하는 예제는 아래 공유 Repository 를 참조하세요.
 
@@ -37,4 +37,4 @@ Single Node 용 Docker Jupyter CPU/GPU Image 는 아래 Repository를 이용하�
 * docker-jupyter: https://github.com/comafire/docker-jupyter
 
 
-St. Kilda Pier는 호주 멜버른에 위치한 작은 펭귄이 서식하는 작고 아름다운 부두입니다.
+_**St. Kilda Pier는 호주 멜버른에 위치한 리틀 펭귄이 서식하는 작고 아름다운 부두입니다.**_

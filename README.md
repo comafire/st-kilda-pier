@@ -12,8 +12,8 @@ Support Docker Container
 * Jupyter
   * Jupyter Kernel: Python2/3, Scala, R, Julia, Go
   * Jupyter Kernel Gateway
-  * Machine Learning
-    * Python2/3 Lib: tensorflow CPU/GPU, pytorch CPU/GPU, keras, pandas, scikit-learn, .. etc
+  * Data Science Library
+    * Python2/3: tensorflow CPU/GPU, pytorch CPU/GPU, keras, pandas, scikit-learn, .. etc
 * Spark
 * Airflow
 * Portainer
@@ -27,6 +27,9 @@ Support Docker Container
 Document
 * [01-cluster.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/01-cluster.md)
 * [02-docker.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/02-docker.md)
+
+Architecture
+<img width="768" src="https://raw.githubusercontent.com/comafire/st-kilda-pier/master/doc/images/2018-st-kilda-pier-001.png"></img>
 
 SKP 를 이용하여 Data Science Project 를 진행하는 예제는 아래 공유 Repository 를 참조하세요.
 

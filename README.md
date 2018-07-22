@@ -29,6 +29,7 @@ Document
 * [02-docker.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/02-docker.md)
 
 Architecture
+
 <img width="768" src="https://raw.githubusercontent.com/comafire/st-kilda-pier/master/doc/images/2018-st-kilda-pier-001.png"></img>
 
 SKP 를 이용하여 Data Science Project 를 진행하는 예제는 아래 공유 Repository 를 참조하세요.

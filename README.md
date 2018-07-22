@@ -8,6 +8,10 @@ SKP는 Docker 기반으로 Cloud 벤더들의 Virtual Machine상에서도 설치
 
 SKP는 Python Fabric 과 Docker 를 이용해 Cluster 구축 시 필요한 컨테이너 이미지 및 명령어 셋을 지원합니다.
 
+Architecture
+
+<img width="768" src="https://raw.githubusercontent.com/comafire/st-kilda-pier/master/doc/images/2018-st-kilda-pier-001.png"></img>
+
 Support Docker Container
 * Jupyter
   * Jupyter Kernel: Python2/3, Scala, R, Julia, Go
@@ -27,10 +31,6 @@ Support Docker Container
 Document
 * [01-cluster.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/01-cluster.md)
 * [02-docker.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/02-docker.md)
-
-Architecture
-
-<img width="768" src="https://raw.githubusercontent.com/comafire/st-kilda-pier/master/doc/images/2018-st-kilda-pier-001.png"></img>
 
 SKP 를 이용하여 Data Science Project 를 진행하는 예제는 아래 공유 Repository 를 참조하세요.
 

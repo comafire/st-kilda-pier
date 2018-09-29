@@ -2,7 +2,7 @@ FROM wurstmeister/base
 
 MAINTAINER comafire@gmail.com
 
-ENV ZOOKEEPER_VERSION 3.4.11
+ENV ZOOKEEPER_VERSION 3.4.13
 
 #Download Zookeeper
 RUN wget -q http://mirror.vorboss.net/apache/zookeeper/zookeeper-${ZOOKEEPER_VERSION}/zookeeper-${ZOOKEEPER_VERSION}.tar.gz && \
@@ -25,7 +25,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-7-openjdk-amd64
 ENV ZK_HOME /opt/zookeeper-${ZOOKEEPER_VERSION}
 RUN sed  -i "s|/tmp/zookeeper|$ZK_HOME/data|g" $ZK_HOME/conf/zoo.cfg; mkdir $ZK_HOME/data
 
-ADD start-zk.sh /usr/bin/start-zk.sh 
+ADD start-zk.sh /usr/bin/start-zk.sh
 EXPOSE 2181 2888 3888
 
 WORKDIR /opt/zookeeper-${ZOOKEEPER_VERSION}
@@ -33,4 +33,5 @@ RUN ln -s /opt/zookeeper-${ZOOKEEPER_VERSION} /opt/zookeeper
 #VOLUME ["/opt/zookeeper-${ZOOKEEPER_VERSION}/conf", "/opt/zookeeper-${ZOOKEEPER_VERSION}/data"]
 VOLUME ["/opt/zookeeper/conf", "/opt/zookeeper/data"]
 
-CMD /usr/sbin/sshd && bash /usr/bin/start-zk.sh
+#CMD /usr/sbin/sshd && bash /usr/bin/start-zk.sh
+CMD bash /usr/bin/start-zk.sh

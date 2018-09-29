@@ -2,5 +2,5 @@
 
 source ./env.sh
 
-echo $@
-fab -f $SKP_HOME/src/fabfile.py "$@"
+#echo $@
+invoke -e -r $SKP_HOME/src/tasks "$@"

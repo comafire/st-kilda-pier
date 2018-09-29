@@ -1,21 +1,8 @@
 # Cluster
 
-운영체제: Ubuntu 16.04
+운영체제: Ubuntu 16.04 LTS (아직 Nvidia-Docker 에서 Ubuntu 18.04 LTS 를 지원하고 있지 않기때문에 해당 버전을 사용합니다.)
 
 클러스터 설정 부분은 어느 정도 수동 설정 부분을 포함하고 있습니다.
-
-## Install Dependencies
-
-SKP에서는 Python Fabric을 이용해서 설치 및 관리를 진행합니다.
-
-현재 Fabric 버전이 2.x 으로 변경되며, 많은 부분의 하위 호환성이 제거되었습니다.
-
-이에, Fabric 2.x 의 안정화시 까지 Fabric 1.x 버전을 사용합니다.
-
-```
-sudo apt-get install -y python-pip sshpass
-pip install fabric==1.13.1
-```
 
 ## Network
 
@@ -67,23 +54,33 @@ sudo usermod -aG sudo skp
 
 ## Setup Locale
 
-Fabric 설치시 시스템 Locale 설정이 되어 있지 않은 경우, 에러가 발생합니다.
+지금 부터 새로 생성된 skp 사용자로 접속하여 설치를 계속 진행합니다.
 
-각자 원하는 Locale 로 설정해 아래와 같이 모든 노드를 설정해 줍니다.
+설치시 시스템 Locale 설정이 되어 있지 않은 경우, 에러가 발생합니다, 각자 원하는 Locale 로 설정해 아래와 같이 Master 노드를 설정해 줍니다, Worker 노드는 추후 명령을 통해 원격 설치를 진행합니다.
 
 ```
-sudo apt-get install -y language-pack-ko; sudo locale-gen ko_KR.UTF-8; sudo dpkg-reconfigure locales
+sudo apt-get install -y language-pack-en && sudo locale-gen en_US.UTF-8 && sudo dpkg-reconfigure locales
 ```
 
 시스템 설정을 업데이트 합니다.
 
 ```
-sudo update-locale LC_ALL=ko_KR.UTF-8 LANG=ko_KR.UTF-8 LC_MESSAGES=POSIX
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LC_MESSAGES=POSIX
+```
+
+## Install Dependencies
+
+SKP에서는 시스템 Python 과 Python Invoke, SSH 원격 명령 및 Docker-Machine을 이용해서 설치 및 관리를 진행합니다.
+
+이를 위해 Master 노드에 아래 패키지를 설치합니다.
+
+```
+sudo apt-get install -y python-pip sshpass && pip install invoke
 ```
 
 ## Install SKP
 
-이제 SKP 를 사용하기 위하여 마스터 노드에 소스를 설치합니다.
+이제 SKP 를 사용하기 위하여 Master 노드에 소스를 설치합니다.
 
 ```
 git clone https://github.com/comafire/st-kilda-pier.git
@@ -111,64 +108,83 @@ groups 는 docker swarm 에서 수행할 역할을 설정합니다.
 
 labels 는 노드상에서 수행할 docker container를 설정합니다.
 
-## Setup SSH
-
-원격으로 각 노드 제어하기 위해 암호 없이 ssh 를 사용할 수 있도록 설정합니다.
-
-sudo vi /etc/ssh/sshd_config 파일을 열어 아래 내용에 대해서 주석을 제거합니다.
+설정이 완료된 후에는 skp.sh -l 명령을 통해 사용가능한 명령어 셋이 출력되는지 테스트 해봅니다, 모든 명령은 SKP_HOME 디렉토리안에 bin 폴더 안에서 수행되어야 합니다.
 
 ```
-AuthorizedKeysFile      %h/.ssh/authorized_keys
-```
+cd st-kilda-pier/bin
+./skp.sh -l
 
-설정 적용을 위해 ssh 서버를 재시작합니다.
+Available tasks:
 
-```
-sudo service ssh restart
-```
-
-암호 없이 키를 통해 ssh 에 접속하기 위해 $SKP_HOME/etc/ssh에 개인/공개 인증 키를 생성합니다.
-
-```
-./skp.sh ssh_keygen
-```
-
-생성된 키를 각 서버와 교환 합니다.
-
-```
-./skp.sh --set SKP_PASSWD="YOUR_PASSWORD" ssh_copy_id
+  blobfs.init
+  docker.airflow-db-init
+  docker.airflow-run
+  docker.airflow-web-passwd-init
+  docker.exec-shell
+  docker.image-build-ds
+  docker.image-build-kafka
+  docker.image-build-zookeeper
+  docker.image-list
+  docker.image-rm
+  docker.jupyter-rm
+  docker.jupyter-run
+  docker.jupyter-shell
+  docker.kafka-rm
+  docker.kafka-run
+  docker.machine-create
+  docker.machine-install
+  docker.machine-rm
+  ...
 ```
 
 ## Setup Hosts
 
-hosts.json 을 기반으로 각 서버마다 /etc/hosts 설정합니다.
+hosts.json 을 기반으로 노드 정보를 Master 노드의 /etc/hosts 추가하고 Worker 노드로 복사합니다.
 
 ```
-./skp.sh etc_hosts
+./skp.sh host.copy -p="YOUR_PASSWORD"
 ```
+
+## Setup SSH
+
+암호 없이 키를 통해 클러스터내의 모든 노드에 ssh로 접속하기 위해 개인/공개 인증 키를 생성하고 모든 노드와 교환합니다.
+
+```
+./skp.sh ssh.copy-id -p="YOUR_PASSWORD"
+```
+
+모든 노드에 원격 명령 수행을 통해 키 복사가 제대로 이루어졌는지 테스트 해봅니다.
+
+```
+./skp.sh ssh.cmd -c="ls -al"
+```
+
+## Setup Locale
+
+Master 노드에서 설정하였던 Locale 과 동일하게 모든 노드의 언어를 설정합니다.
+
+```
+./skp.sh lang.install -l="en_US.UTF-8"
+```
+
+설치 후, 콘솔 창이 오작동하는 현상이 있을 경우, 콘솔 창을 닫고 다시 접속하면 됩니다.
 
 ## Setup SKP_HOME Share Volume
 
-클러스터에서 모든 노드는 같은 SKP_HOME 을 공유해야 합니다.
+클러스터에서 모든 노드는 일부 서비스를 위해 노드간 데이터 동기화가 필요한 경우를 위해 같은 SKP_HOME 을 공유합니다.
 
-여기에서는 NFS 를 사용합니다. 아래 명령을 통해서 nfs 를 각 노드에 설치합니다.
-
-```
-./skp.sh nfs_install
-```
-
-nfs 공유를 위해 Master 노드의 SKP_HOME 권한을 root의 777로 변경합니다.
+NFS 사용을 위해 아래 명령을 통해서 nfs 를 각 노드에 설치합니다.
 
 ```
-source env.sh
-sudo chown -R root:root $SKP_HOME
-sudo chmod 777 $SKP_HOME
+./skp.sh nfs.install
 ```
 
-sudo vi /etc/exports 파일 수정을 통해 nfs 접근 네트워크를 추가합니다. 공유 디렉토리 경로는 SKP_HOME 과 동일해야 합니다.
+sudo vi /etc/exports 파일 수정을 통해 nfs 접근 네트워크를 추가합니다. 접근 네트워크는 사용하시는 IP 에 따라 다르게 설정하면 됩니다. 여기서는 노드들이 10.0.x.x 대 IP 를 사용하기에 10.0.0.0/16 으로 설정하였습니다.
+
+공유 디렉토리 경로는 SKP_HOME 과 동일해야 합니다.
 
 ```
-/home/skp/st-kilda-pier 192.168.0.0/24(rw,insecure,no_root_squash,no_subtree_check,sync)
+/home/skp/st-kilda-pier 10.0.0.0/16(rw,insecure,no_root_squash,no_subtree_check,sync)
 ```
 
 nfs 서버를 재시작 합니다.
@@ -180,13 +196,19 @@ sudo service nfs-kernel-server restart
 아래 명령을 통해 Worker 노드에 디렉토리 생성 및 마운트를 해줍니다.
 
 ```
-./skp.sh nfs_mount_skp
+./skp.sh nfs.mount-skp
 ```
 
 아래 명령을 통해서 각 Worker 노드의 마운트가 잘되었는지 체크합니다.
 
 ```
-./skp.sh rcmd --set RCMD="df -h"
+./skp.sh ssh.cmd -c="df -h"
+```
+
+예)
+
+```
+10.0.0.4:/home/skp/st-kilda-pier         252G   11G  229G   5% /home/skp/st-kilda-pier
 ```
 
 ## Setup DFS
@@ -209,36 +231,26 @@ env.sh 파일에서 DFS 의 mount 경로를 지정해 줍니다.
 export SKP_DFS="/mnt/dfs" # Your DFS Path
 ```
 
-## Setup Docker Machine
+## Setup Docker-Machine
 
 Master 에서 Worker 노드를 편리하게 관리하기 위해 docker-machine 을 설치합니다.
 
-docker-machine 에서 사용하는 port에 대하여 접근을 허용하기 위해 아래 명령으로 모든 노드의 방화벽 설정을 추가 합니다.
-
 ```
-./skp.sh ufw
-```
-
-아래 명령으로 모든 노드에 docker-machine을 설치하고 sudo 없이 docker 명령을 사용할 수 있도록 합니다.
-
-```
-source env.sh
-./skp.sh docker_machine_install
-./skp.sh rcmd --set RCMD="sudo usermod -aG docker $SKP_USER"
+./skp.sh docker.machine-install
 ```
 
 아래 명령으로 모든 노드에 docker-machine을 생성합니다.
 
 ```
-./skp.sh docker_machine_create
+./skp.sh docker.machine-create
 ```
 
 이제 Master 에서 Worker 노드를 제어하기 위한 클러스터 설정이 마무리 되었습니다.
 
 ## Utils
 
-모든 노드에 같은 원격 명령이 필요할때는 rcmd 명령 사용이 가능합니다. 아래는 모든 노드에서 ls -al 명령을 실행하는 예제 입니다.
+모든 노드에 같은 원격 명령이 필요할때는 cmd 명령 사용이 가능합니다. 아래는 모든 노드에서 ls -al 명령을 실행하는 예제 입니다.
 
 ```
-./skp.sh rcmd --set RCMD="ls -al"
+./skp.sh ssh.cmd -c="ls -al"
 ```

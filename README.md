@@ -6,7 +6,7 @@ Amazon, Azure 등 Cloud 벤더들의 서비스를 이용하면 비슷한 서비�
 
 SKP는 Docker 기반으로 Cloud 벤더들의 Virtual Machine상에서도 설치 가능합니다.
 
-SKP는 Python Fabric 과 Docker 를 이용해 Cluster 구축 시 필요한 컨테이너 이미지 및 명령어 셋을 지원합니다.
+SKP는 Python Invoke, SSH Remote Command, Docker-Machine 를 이용해 Docker를 이용한 Big Data Cluster 구축 시 필요한 컨테이너 이미지 및 명령어 셋을 지원합니다.
 
 Architecture
 

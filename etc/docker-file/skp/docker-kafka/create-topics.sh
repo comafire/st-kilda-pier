@@ -26,16 +26,32 @@ if $start_timeout_exceeded; then
     exit 1
 fi
 
+# introduced in 0.10. In earlier versions, this will fail because the topic already exists.
+# shellcheck disable=SC1091
+source "/usr/bin/versions.sh"
+if [[ "$MAJOR_VERSION" == "0" && "$MINOR_VERSION" -gt "9" ]] || [[ "$MAJOR_VERSION" -gt "0" ]]; then
+    KAFKA_0_10_OPTS="--if-not-exists"
+fi
+
 # Expected format:
 #   name:partitions:replicas:cleanup.policy
-IFS=','; for topicToCreate in $KAFKA_CREATE_TOPICS; do
+IFS="${KAFKA_CREATE_TOPICS_SEPARATOR-,}"; for topicToCreate in $KAFKA_CREATE_TOPICS; do
     echo "creating topics: $topicToCreate"
     IFS=':' read -r -a topicConfig <<< "$topicToCreate"
     config=
     if [ -n "${topicConfig[3]}" ]; then
         config="--config=cleanup.policy=${topicConfig[3]}"
     fi
-    JMX_PORT='' "$KAFKA_HOME/bin/kafka-topics.sh" --create --zookeeper "$KAFKA_ZOOKEEPER_CONNECT" --replication-factor "${topicConfig[2]}" --partitions "${topicConfig[1]}" --topic "${topicConfig[0]}" "$config" --if-not-exists &
+
+    COMMAND="JMX_PORT='' ${KAFKA_HOME}/bin/kafka-topics.sh \\
+		--create \\
+		--zookeeper ${KAFKA_ZOOKEEPER_CONNECT} \\
+		--topic ${topicConfig[0]} \\
+		--partitions ${topicConfig[1]} \\
+		--replication-factor ${topicConfig[2]} \\
+		${config} \\
+		${KAFKA_0_10_OPTS} &"
+    eval "${COMMAND}"
 done
 
 wait

@@ -101,6 +101,8 @@ ENV/
 # mnt
 **/mnt/
 
+etc/ssh/
+
 volume/var/mysql/
 volume/var/registry/
 volume/var/zookeeper/
@@ -114,3 +116,11 @@ volume/var/kafka/
 **/airflow-scheduler.*
 **/airflow-webserver.*
 **/.DS_Store
+
+**/blob-passwd
+**/s3-passwd
+
+**/.ipynb_checkpoints
+**/spark-warehouse
+
+

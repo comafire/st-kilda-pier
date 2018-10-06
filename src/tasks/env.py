@@ -111,6 +111,6 @@ NGINX_TAG = os.environ["NGINX_TAG"]
 
 hosts = []
 
-with open("/home/skp/st-kilda-pier/etc/hosts.json") as f:
+with open("{}/etc/hosts.json".format(SKP_HOME)) as f:
     hosts = json.load(f)
     # pprint(hosts)

@@ -36,6 +36,10 @@ SKP 를 이용하여 Data Science Project 를 진행하는 예제는 아래 공�
 
 * notebooks-skp: https://github.com/comafire/notebooks-skp
 
+MacOS 용 St. Kilda Pier는 아래 Repository를 이용하세요.
+
+* docker-jupyter: https://github.com/comafire/st-kilda-pier-for-macos
+
 Single Node 용 Docker Jupyter CPU/GPU Image 는 아래 Repository를 이용하세요.
 
 * docker-jupyter: https://github.com/comafire/docker-jupyter

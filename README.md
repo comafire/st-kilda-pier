@@ -12,7 +12,7 @@ Architecture
 
 클러스터 설치에 대한 자세한 사항은 doc 디렉토리 안에 Markdown 파일을 참조하세요.
 
-Document
+Documents
 * [00-baremetal.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/00-baremetal.md)
 * [00-vagrant.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/00-vagrant.md)
 * [00-etc.md](https://github.com/comafire/st-kilda-pier/blob/master/doc/00-etc.md)

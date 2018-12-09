@@ -1,0 +1,7 @@
+{
+  "net-skp" : {
+    "opts" : [
+      "--attachable --driver overlay"
+    ]
+  }
+}

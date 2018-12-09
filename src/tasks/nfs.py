@@ -1,36 +1,40 @@
 from __future__ import with_statement
 from invoke import task
-import env, utils
+import env, utils, os
 
 @task
 def install(c):
+    ports = [2049]
+
+    cmd = "sudo apt-get install -y nfs-kernel-server portmap"
+    utils.run_with_exit(c, cmd)
+
     for k, v in env.hosts.iteritems():
-        cmd = "ssh -o StrictHostKeyChecking=no {}@{} ".format(env.SKP_USER, v["ipv4"])
-        cmd += "sudo apt-get install -y nfs-common nfs-kernel-server portmap"
+        for port in ports:
+            cmd = "ssh -o StrictHostKeyChecking=no {}@{} sudo ufw allow {}".format(env.SKP_USER, v["ipv4"], port)
+            utils.run_with_exit(c, cmd)
+
+            cmd = "ssh -o StrictHostKeyChecking=no {}@{} sudo apt-get install -y nfs-common".format(env.SKP_USER, v["ipv4"])
+            utils.run_with_exit(c, cmd)
+
+@task
+def exportfs(c, name=""):
+    volumes = utils.get_volumes(env.volumes, name)
+    for vk, vv in volumes.iteritems():
+        if vv["type"] != "nfs":
+            continue
+
+        cmd = "mkdir -p {}".format(os.path.expandvars(vv["path"]))
+        utils.run_with_exit(c, cmd)
+
+    cmds = [
+        "sudo exportfs -a",
+        "showmount -e"
+    ]
+    for cmd in cmds:
         utils.run_with_exit(c, cmd)
 
 @task
-def mount_skp(c):
-    SKP_MNAME, SKP_MIP = utils.get_mhost(env.hosts)
-    for k, v in env.hosts.iteritems():
-        if v["ipv4"] == SKP_MIP:
-            continue
-
-        cmd = "ssh -o StrictHostKeyChecking=no {}@{} ".format(env.SKP_USER, v["ipv4"])
-        cmd += "mkdir -p {}".format(env.SKP_HOME)
-        utils.run_with_exit(c, cmd)
-
-        cmd = "ssh -o StrictHostKeyChecking=no {}@{} ".format(env.SKP_USER, v["ipv4"])
-        cmd += "sudo mount -t nfs -o proto=tcp,port=2049 {}:{} {}".format(SKP_MIP, env.SKP_HOME, env.SKP_HOME)
-        utils.run_with_exit(c, cmd)
-
-@task
-def umount_skp(c):
-    SKP_MNAME, SKP_MIP = utils.get_mhost(env.hosts)
-    for k, v in env.hosts.iteritems():
-        if v["ipv4"] == SKP_MIP:
-            continue
-
-        cmd = "ssh -o StrictHostKeyChecking=no {}@{} ".format(env.SKP_USER, v["ipv4"])
-        cmd += "sudo umount {}".format(env.SKP_HOME)
-        utils.run_with_exit(c, cmd)
+def restart(c):
+    cmd = "sudo service nfs-kernel-server restart"
+    utils.run_with_exit(c, cmd)

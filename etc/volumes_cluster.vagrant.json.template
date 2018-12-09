@@ -1,0 +1,141 @@
+{
+  "volume-skp" : {
+    "type" : "fs",
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_HOME"
+    ],
+    "path" : "$SKP_HOME"
+  },
+  "volume-sshfs" : {
+    "type" : "sshfs",
+    "opts" : [
+      "-o sshcmd=vagrant@192.168.0.51:/home/vagrant"
+    ],
+    "conn" : "vagrant@192.168.0.51"
+  },
+  "volume-dfs" : {
+    "type" : "fs",
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-dfs"
+    ],
+    "path" : "$SKP_MNT/volume-dfs"
+  },
+  "volume-blobfs" : {
+    "type" : "blobfs",
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-blobfs"
+    ],
+    "path" : "$SKP_MNT/volume-blobfs",
+    "account_name" : "YOUR_ACCOUNT_NAME",
+    "account_key" : "YOUR_ACCOUNT_KEY",
+    "container_name" : "YOUR_CONTAINER_NAME"
+  },
+  "volume-s3fs" : {
+    "type" : "s3fs",
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-s3fs"
+    ],
+    "path" : "$SKP_MNT/volume-s3fs",
+    "account_id" : "YOUR_ACCOUNT_ID",
+    "account_key" : "YOUR_ACCOUNT_KEY",
+    "bucket" : "YOUR_BUCKET"
+  },
+  "volume-registry-skp" : {
+    "type" : "nfs",
+    "opts" : [
+      "--driver local",
+      "--opt type=nfs",
+      "--opt o=addr=192.168.0.51,rw",
+      "--opt device=:$SKP_MNT/volume-registry-skp"
+    ],
+    "path" : "$SKP_MNT/volume-registry-skp"
+  },
+  "volume-jupyter-skp" : {
+    "type" : "nfs",
+    "opts" : [
+      "--driver local",
+      "--opt type=nfs",
+      "--opt o=addr=192.168.0.51,rw",
+      "--opt device=:$SKP_MNT/volume-jupyter-skp"
+    ],
+    "path" : "$SKP_MNT/volume-jupyter-skp"
+  },
+  "volume-mysql-skp" : {
+    "type" : "fs",
+    "labels" : [
+      "mysql"
+    ],
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-mysql-skp"
+    ],
+    "path" : "$SKP_MNT/volume-mysql-skp"
+  },
+  "volume-pgsql-skp" : {
+    "type" : "fs",
+    "labels" : [
+      "pgsql"
+    ],
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-pgsql-skp"
+    ],
+    "path" : "$SKP_MNT/volume-pgsql-skp"
+  },
+  "volume-airflow-skp" : {
+    "type" : "fs",
+    "labels" : [
+      "airflow"
+    ],
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-airflow-skp"
+    ],
+    "path" : "$SKP_MNT/volume-airflow-skp"
+  },
+  "volume-portainer-skp" : {
+    "type" : "fs",
+    "labels" : [
+      "portainer"
+    ],
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-portainer-skp"
+    ],
+    "path" : "$SKP_MNT/volume-portainer-skp"
+  },
+  "volume-kafka-skp" : {
+    "type" : "fs",
+    "labels" : [
+      "kafka"
+    ],
+    "opts" : [
+      "--driver local",
+      "--opt type=none",
+      "--opt o=bind",
+      "--opt device=$SKP_MNT/volume-kafka-skp"
+    ],
+    "path" : "$SKP_MNT/volume-kafka-skp"
+  }
+
+}

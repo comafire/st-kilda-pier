@@ -1,0 +1,142 @@
+{
+  "registry-skp" : {
+    "label" : "registry",
+    "networks" : [
+      "net-skp"
+    ],
+    "ports": [
+      "5000:5000"
+    ],
+    "environments" : [
+    ],
+    "volumes" : [
+      "volume-registry-skp:/var/lib/registry"
+    ],
+    "image" : "registry:2"
+  },
+
+  "jupyter-skp" : {
+    "label" : "jupyter",
+    "networks" : [
+      "net-skp"
+    ],
+    "ports" : [
+      "8010:8888",
+      "8020:8088"
+    ],
+    "environments" : [
+      "SKP_SHOME=$SKP_SHOME",
+      "SKP_SMNT=$SKP_SMNT",
+      "JUPYTER_PASSWORD=jupyter-pw",
+      "JUPYTER_BASEURL=jupyter-skp"
+    ],
+    "volumes" : [
+      "/var/run/docker.sock:/var/run/docker.sock",
+      "volume-skp:$SKP_SHOME",
+      "volume-jupyter-skp:$SKP_SMNT/volume-jupyter-skp",
+      "volume-sshfs:$SKP_SMNT/volume-sshfs",
+      "volume-blobfs:$SKP_SMNT/volume-blobfs",
+      "volume-s3fs:$SKP_SMNT/volume-s3fs",
+      "volume-dfs:$SKP_SMNT/volume-dfs"
+    ],
+    "cmd" : "$SKP_SHOME/volume/bin/run_jupyter.sh",
+    "image" : "localhost:5000/skp/docker-ds:latest",
+    "docker" : "docker"
+  },
+
+  "mysql-skp" : {
+    "label" : "mysql",
+    "networks" : [
+      "net-skp"
+    ],
+    "ports" : [
+      "3306:3306"
+    ],
+    "environments" : [
+      "MYSQL_ROOT_HOST=%",
+      "MYSQL_ROOT_PASSWORD=mysql-pw"
+    ],
+    "volumes" : [
+      "volume-mysql-skp:/var/lib/mysql"
+    ],
+    "image" : "mysql/mysql-server:latest"
+  },
+
+  "pgsql-skp" : {
+    "label" : "pgsql",
+    "networks" : [
+      "net-skp"
+    ],
+    "ports" : [
+      "5432:5432"
+    ],
+    "environments" : [
+      "PGDATA=/var/lib/pgsql/data",
+      "PGSQL_ROOT_PASSWORD=pgsql-pw"
+    ],
+    "volumes" : [
+      "volume-pgsql-skp:/var/lib/pgsql"
+    ],
+    "image" : "postgres:latest"
+  },
+
+  "airflow-skp" : {
+    "label" : "airflow",
+    "networks" : [
+      "net-skp"
+    ],
+    "ports" : [
+      "8040:8080"
+    ],
+    "environments" : [
+      "SKP_SHOME=$SKP_SHOME",
+      "SKP_SMNT=$SKP_SMNT",
+      "AIRFLOW_HOME=$SKP_SHOME/volume/var/airflow",
+      "AIRFLOW_DB=airflow",
+      "AIRFLOW_DB_USER=airflow",
+      "AIRFLOW_DB_PASSWORD=airflow-pw",
+      "AIRFLOW__CORE__SQL_ALCHEMY_CONN=mysql://airflow:airflow-pw@mysql-skp/airflow"
+    ],
+    "volumes" : [
+      "volume-skp:$SKP_SHOME",
+      "volume-jupyter-skp:$SKP_SMNT/volume-jupyter-skp",
+      "volume-sshfs:$SKP_SMNT/volume-sshfs",
+      "volume-blobfs:$SKP_SMNT/volume-blobfs",
+      "volume-s3fs:$SKP_SMNT/volume-s3fs",
+      "volume-dfs:$SKP_SMNT/volume-dfs"
+    ],
+    "cmd" : "$SKP_SHOME/volume/bin/run_airflow.sh",
+    "image" : "localhost:5000/skp/docker-ds:latest",
+    "docker" : "docker"
+  },
+
+  "portainer-skp" : {
+    "label" : "portainer",
+    "networks" : [
+      "net-skp"
+    ],
+    "ports" : [
+      "8050:9000"
+    ],
+    "volumes" : [
+      "volume-portainer-skp:/data"
+    ],
+    "image" : "portainer/portainer",
+    "cmd" : "-H 'tcp://portainer-agent-skp:9001' --tlsskipverify "
+  },
+  "portainer-agent-skp" : {
+    "label" : "portainer-agent",
+    "networks" : [
+      "net-skp"
+    ],
+    "environments" : [
+      "AGENT_CLUSTER_ADDR=portainer-agent-skp"
+    ],
+    "volumes" : [
+      "/var/run/docker.sock:/var/run/docker.sock",
+      "/var/lib/docker/volumes:/var/lib/docker/volumes"
+    ],
+    "image" : "portainer/agent"
+  }
+
+}

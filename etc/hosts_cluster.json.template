@@ -1,0 +1,62 @@
+{
+  "c01" : {
+    "ipv4" : "192.168.0.51",
+    "labels" : {
+      "registry" : "enable",
+      "jupyter" : "enable",
+      "spark-master" : "enable",
+      "portainer" : "enable",
+      "portainer-agent" : "enable",
+      "airflow" : "enable",
+      "mysql" : "enable",
+      "pgsql" : "enable",
+      "zookeeper" : "enable",
+      "kafka" : "enable",
+      "flask" : "enable",
+      "nginx" : "enable"
+    },
+    "roles" : ["master", "manager"]
+  },
+  "c02" : {
+    "ipv4" : "192.168.0.52",
+    "labels" : {
+      "registry" : "enable",
+      "spark-worker" : "enable",
+      "portainer-agent" : "enable",
+      "zookeeper" : "enable",
+      "kafka" : "enable"
+    },
+    "roles" : ["slave", "manager"]
+  },
+  "c03" : {
+    "ipv4" : "192.168.0.53",
+    "labels" : {
+      "registry" : "enable",
+      "spark-worker" : "enable",
+      "portainer-agent" : "enable",
+      "zookeeper" : "enable",
+      "kafka" : "enable"
+    },
+    "roles" : ["slave", "manager"]
+  },
+  "c04" : {
+    "ipv4" : "192.168.0.54",
+    "labels" : {
+      "registry" : "enable",
+      "spark-worker" : "enable",
+      "portainer-agent" : "enable",
+      "kafka" : "enable"
+    },
+    "roles" : ["slave", "worker"]
+  },
+  "c05" : {
+    "ipv4" : "192.168.0.55",
+    "labels" : {
+      "registry" : "enable",
+      "spark-worker" : "enable",
+      "portainer-agent" : "enable",
+      "kafka" : "enable"
+    },
+    "roles" : ["slave", "worker"]
+  }
+}

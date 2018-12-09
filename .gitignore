@@ -101,7 +101,12 @@ ENV/
 # mnt
 **/mnt/
 
+# bin
+bin/*.sh
+
+# etc
 etc/ssh/
+etc/*.json
 
 volume/var/mysql/
 volume/var/registry/
@@ -109,7 +114,7 @@ volume/var/zookeeper/
 volume/var/kafka/
 
 **/env.sh
-**/hosts.json
+**/skp.sh
 **/*_rsa*
 **/metastore_db/
 
@@ -123,4 +128,4 @@ volume/var/kafka/
 **/.ipynb_checkpoints
 **/spark-warehouse
 
-
+**/.vagrant/

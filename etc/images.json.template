@@ -1,0 +1,38 @@
+{
+  "skp/docker-ds" : {
+    "opts" : [
+      "--build-arg locale=en_US.UTF-8",
+      "--build-arg gpu=FALSE"
+    ],
+    "registry" : "localhost:5000",
+    "path" : "skp/docker-ds",
+    "image" : "skp/docker-ds",
+    "tag" : "latest"
+  },
+  "skp/docker-ds-gpu" : {
+    "opts" : [
+      "--build-arg locale=en_US.UTF-8",
+      "--build-arg gpu=TRUE"
+    ],
+    "registry" : "localhost:5000",
+    "path" : "skp/docker-ds",
+    "image" : "skp/docker-ds-gpu",
+    "tag" : "latest"
+  },
+  "skp/docker-zookeeper" : {
+    "opts" : [
+    ],
+    "registry" : "localhost:5000",
+    "path" : "skp/docker-zookeeper",
+    "image" : "skp/docker-zookeeper",
+    "tag" : "latest"
+  },
+  "skp/docker-kafka" : {
+    "opts" : [
+    ],
+    "registry" : "localhost:5000",
+    "path" : "skp/docker-kafka",
+    "image" : "skp/docker-kafka",
+    "tag" : "latest"
+  }
+}

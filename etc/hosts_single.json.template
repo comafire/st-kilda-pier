@@ -1,0 +1,19 @@
+{
+  "s01" : {
+    "ipv4" : "192.168.0.50",
+    "labels" : {
+      "registry" : "enable",
+      "jupyter" : "enable",
+      "portainer" : "enable",
+      "portainer-agent" : "enable",
+      "airflow" : "enable",
+      "mysql" : "enable",
+      "pgsql" : "enable",
+      "zookeeper" : "enable",
+      "kafka" : "enable",            
+      "flask" : "enable",
+      "nginx" : "enable"
+    },
+    "roles" : ["master", "manager"]
+  }
+}

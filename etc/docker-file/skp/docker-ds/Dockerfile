@@ -59,23 +59,9 @@ python3 python3-dev python3-pip python3-virtualenv python3-software-properties
 RUN pip3 install --upgrade pip
 RUN pip3 install --cache-dir /tmp/pip3 --upgrade setuptools wheel
 
-# JAVA http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/server-jre-8u131-linux-x64.tar.gz
-ENV JAVA_MAJOR_VERSION 8
-ENV JAVA_UPDATE_VERSION 181
-ENV JAVA_BUILD_NUMBER 13
-ENV JAVA_TOKEN 96a7b8442fe848ef90c96a2fad6ed6d1
-ENV JAVA_HOME /usr/local/jdk1.${JAVA_MAJOR_VERSION}.0_${JAVA_UPDATE_VERSION}
-
-ENV PATH $PATH:$JAVA_HOME/bin
-RUN curl -sL --retry 3 --insecure \
---header "Cookie: oraclelicense=accept-securebackup-cookie;" \
-"http://download.oracle.com/otn-pub/java/jdk/${JAVA_MAJOR_VERSION}u${JAVA_UPDATE_VERSION}-b${JAVA_BUILD_NUMBER}/${JAVA_TOKEN}/server-jre-${JAVA_MAJOR_VERSION}u${JAVA_UPDATE_VERSION}-linux-x64.tar.gz" \
-| gunzip | tar x -C /usr/local/ \
-&& ln -s $JAVA_HOME /usr/local/java \
-&& rm -rf $JAVA_HOME/man
-
+# Java
 RUN apt-get update && apt-get install -y --no-install-recommends \
-maven
+default-jdk maven
 
 # Scala
 ENV SCALA_VERSION 2.11.11
@@ -88,17 +74,16 @@ RUN curl -sL --retry 3 --insecure \
 && ln -s $SCALA_HOME /usr/local/scala
 
 # Julia
-# install Julia packages in /opt/julia instead of $HOME
-ENV JULIA_PKGDIR /opt/julia
-ENV JULIA_VERSION 1.0.0
+ENV JULIA_VERSION 1.0.2
 
-RUN mkdir /opt/julia-${JULIA_VERSION} && \
-    cd /tmp && \
-    wget -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz && \
-    echo "bea4570d7358016d8ed29d2c15787dbefaea3e746c570763e7ad6040f17831f3 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
-    tar xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz -C /opt/julia-${JULIA_VERSION} --strip-components=1 && \
-    rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
+RUN apt-get update && apt-get install -y build-essential libatomic1 python gfortran perl wget m4 cmake pkg-config
+RUN cd /usr/local && git clone git://github.com/JuliaLang/julia.git && cd julia && git checkout v${JULIA_VERSION}
+RUN cd /usr/local/julia && make -j 4
+RUN sudo ln -s /usr/local/julia/usr/bin/julia /usr/local/bin/julia
+RUN /usr/local/julia/usr/bin/julia -v
+RUN ls -al /usr/local/bin
+RUN julia -v
+RUN julia -e 'using Pkg;Pkg.update()'
 
 # R
 RUN apt-get update && apt-get --allow-unauthenticated install -y --no-install-recommends \
@@ -183,8 +168,8 @@ RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 ghp-import2 nikola[extras]
 # DeepLearning
 ARG gpu="FALSE"
 ENV GPU ${gpu}
-ENV TENSORFLOW_VER 1.9.0rc0
-ENV PYTORCH_VER 0.4.0
+ENV TENSORFLOW_VER 1.12.0
+ENV PYTORCH_VER 0.4.1
 RUN echo "GPU: $GPU"
 RUN if [[ $GPU = *TRUE* ]] \
 ; then \
@@ -212,7 +197,6 @@ RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 apache-airflow apache-airfl
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 bleach>=2.1.2
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 apache-airflow apache-airflow[s3,postgres,mysql,crypto,password]
 
-
 # Jupyter Deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
 texlive-xetex
@@ -234,13 +218,13 @@ RUN python3 -m pip install ipykernel
 RUN python3 -m ipykernel install --user
 
 # Jupyter Scala
-RUN git clone https://github.com/alexarchambault/jupyter-scala.git;cd jupyter-scala;./jupyter-scala
+RUN python3 -m pip install spylon-kernel
+RUN python3 -m spylon_kernel install --user
 
 # Jupyter Julia Kernel
 RUN julia -e 'import Pkg;Pkg.update()' && \
 julia -e 'import Pkg;Pkg.add("Gadfly")' && \
 julia -e 'import Pkg;Pkg.add("RDatasets")' && \
-#julia -e 'import Pkg;Pkg.add("Spark.jl")' && \
 julia -e 'import Pkg;Pkg.add("IJulia")' && \
 # Precompile Julia packages
 julia -e 'using IJulia'
@@ -263,13 +247,6 @@ libzmq3-dev
 RUN go get github.com/yunabe/lgo/cmd/lgo && go get -d github.com/yunabe/lgo/cmd/lgo-internal
 RUN lgo install
 RUN python3 $(go env GOPATH)/src/github.com/yunabe/lgo/bin/install_kernel
-
-# for Airflow
-ENV AIRFLOW_HOME /root/volume/var/airflow
-
-# Env
-VOLUME /root/volume
-WORKDIR /root/volume
 
 # for Spark
 EXPOSE 4040 6066 7077 8080

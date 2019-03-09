@@ -15,4 +15,5 @@ jupyter nbextension enable toggle_all_line_numbers/main
 jupyter nbextension enable toc2/main
 # jupyter nbextension enable code_prettify/code_prettify
 jupyter nbextension enable codefolding/edit
-jupyter notebook --allow-root
+#jupyter notebook --allow-root
+jupyter lab --allow-root

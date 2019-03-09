@@ -47,15 +47,9 @@ RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubunt
 RUN apt-get update && apt-get install -y --no-install-recommends \
 docker-ce
 
-# Python2
-RUN apt-get update && apt-get install -y --no-install-recommends \
-python python-dev python-pip python-virtualenv python-software-properties
-RUN pip2 install --upgrade pip
-RUN pip2 install --cache-dir /tmp/pip2 --upgrade setuptools wheel
-
 # Python3
 RUN apt-get update && apt-get install -y --no-install-recommends \
-python3 python3-dev python3-pip python3-virtualenv python3-software-properties
+python3 python3-dev python3-pip python3-virtualenv python3-software-properties python3-gdbm
 RUN pip3 install --upgrade pip
 RUN pip3 install --cache-dir /tmp/pip3 --upgrade setuptools wheel
 
@@ -127,9 +121,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 nginx
 
 # SPARK
-ENV SPARK_VERSION 2.3.1
+ENV SPARK_VERSION 2.4.0
 ENV SPARK_PACKAGE spark-${SPARK_VERSION}-bin-hadoop2.7
 ENV SPARK_HOME /usr/local/spark-${SPARK_VERSION}
+ENV PYSPARK_PYTHON /usr/bin/python3
+ENV PYSPARK_DRIVER_PYTHON /usr/bin/python3
 ENV PY4J_VERSION 0.10.7
 
 ENV PATH $PATH:${SPARK_HOME}/bin
@@ -142,19 +138,10 @@ RUN curl -sL --retry 3 \
 ENV PYTHONPATH $SPARK_HOME/python/:$PYTHONPATH
 ENV PYTHONPATH $SPARK_HOME/python/lib/py4j-$PY4J_VERSION-src.zip:$PYTHONPATH
 
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 py4j==$PY4J_VERSION
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 py4j==$PY4J_VERSION
 
 # for Airflow (don't use GPL dependency library)
 ENV SLUGIFY_USES_TEXT_UNIDECODE yes
-
-# Python2 Deps
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 docker fabric pytest pycrypto
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 numpy scipy scikit-learn matplotlib pandas pandas_ml pandas-datareader quandl h5py
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 statsmodels imblearn awscli seaborn xgboost nbformat boto3 xlrd pyarrow
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 mysql-python mysql-connector-python-rf pymysql psycopg2 sqlalchemy
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 flask flask-restful flask-jwt-extended flask_bcrypt flask-sqlalchemy flask-testing
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 nose passlib pybase62 uuid0 imageio
 
 # Python3 Deps
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 docker fabric pytest pycrypto
@@ -164,36 +151,29 @@ RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 mysqlclient mysql-connector
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 flask flask-restful flask-jwt-extended flask_bcrypt flask-sqlalchemy flask-testing
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 nose passlib pybase62 uuid0 imageio
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 ghp-import2 nikola[extras]
+RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 six>=1.12.0
 
 # DeepLearning
 ARG gpu="FALSE"
 ENV GPU ${gpu}
 ENV TENSORFLOW_VER 1.12.0
-ENV PYTORCH_VER 0.4.1
+ENV PYTORCH_VER 1.0.1.post2
 RUN echo "GPU: $GPU"
 RUN if [[ $GPU = *TRUE* ]] \
 ; then \
 # For Tensorflow GPU
 apt-get update && apt-get install -y --no-install-recommends \
 libcupti-dev nvidia-modprobe \
-&& pip2 install --cache-dir /tmp/pip2 --timeout 600 tensorflow-gpu==$TENSORFLOW_VER keras \
-http://download.pytorch.org/whl/cu90/torch-$PYTORCH_VER-cp27-cp27mu-linux_x86_64.whl \
-torchvision \
 && pip3 install --cache-dir /tmp/pip3 --timeout 600 tensorflow-gpu==$TENSORFLOW_VER keras \
-http://download.pytorch.org/whl/cu90/torch-$PYTORCH_VER-cp35-cp35m-linux_x86_64.whl \
+torch \
 torchvision \
 ; else \
-pip2 install --cache-dir /tmp/pip2 --timeout 600 tensorflow==$TENSORFLOW_VER keras \
-http://download.pytorch.org/whl/cpu/torch-$PYTORCH_VER-cp27-cp27mu-linux_x86_64.whl \
-torchvision \
-&& pip3 install --cache-dir /tmp/pip3 --timeout 600 tensorflow==$TENSORFLOW_VER keras \
+pip3 install --cache-dir /tmp/pip3 --timeout 600 tensorflow==$TENSORFLOW_VER keras \
 http://download.pytorch.org/whl/cpu/torch-$PYTORCH_VER-cp35-cp35m-linux_x86_64.whl \
 torchvision \
 ; fi
 
 # Airflow
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 bleach>=2.1.2
-RUN pip2 install --cache-dir /tmp/pip2 --timeout 600 apache-airflow apache-airflow[s3,postgres,mysql,crypto,password]
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 bleach>=2.1.2
 RUN pip3 install --cache-dir /tmp/pip3 --timeout 600 apache-airflow apache-airflow[s3,postgres,mysql,crypto,password]
 
@@ -202,16 +182,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 texlive-xetex
 
 # Jupyter
-RUN pip3 install -v --no-cache-dir --timeout 600 jupyter
+RUN pip3 install -v --no-cache-dir --timeout 600 jupyter jupyterlab
 # Jupyter extensions
 RUN pip3 install -v --no-cache-dir --timeout 600 jupyter_contrib_nbextensions
 RUN pip3 install -v --no-cache-dir --timeout 600 jupyter_nbextensions_configurator
 RUN pip3 install -v --no-cache-dir --timeout 600 yapf
 RUN pip3 install -v --no-cache-dir --timeout 600 nbimporter jdc jupyter_kernel_gateway
-
-# Jupyter Python2 kernel
-RUN python2 -m pip install ipykernel
-RUN python2 -m ipykernel install --user
 
 # Jupyter Python3 kernel
 RUN python3 -m pip install ipykernel

@@ -1,0 +1,14 @@
+---
+- hosts: all
+  
+  tasks:
+  - name: disable docker sshfs plugin
+    shell: "docker plugin disable vieux/sshfs"
+    args:
+      chdir: /tmp
+      warn: False
+  - name: remove docker sshfs plugin
+    shell: "docker plugin rm vieux/sshfs"
+    args:
+      chdir: /tmp
+      warn: False

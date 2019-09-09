@@ -1,0 +1,28 @@
+---
+- hosts: all
+  vars:
+    user: "{{ lookup('env','USER') }}"
+    home: "{{ lookup('env','HOME') }}"
+    language_pack: "language-pack-en" # or "language-pack-ko"
+    locale: "en_US.UTF-8" # or "ko_KR.UTF-8"
+  become: yes
+
+  tasks:
+  # LANG
+  - name: install locales {{ language_pack }}
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+        - locales
+        - "{{ language_pack }}"
+  - name: locale.gen {{ locale }}
+    shell: "sed -i -e 's/# {{ locale }} UTF-8/{{ locale }} UTF-8/' /etc/locale.gen && sudo locale-gen"
+    args:
+      warn: False
+  - name: update-locale
+    shell: "update-locale LC_ALL={{ locale }} LANG={{ locale }} LC_MESSAGES=POSIX"
+    args:
+      warn: False

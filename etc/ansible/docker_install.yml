@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  strategy: free
+  become: yes
   vars:
     user: "{{ lookup('env', 'USER') }}"
     docker_ver: 5:19.03.2~3-0~ubuntu-bionic
@@ -74,5 +74,8 @@
 
   - name: ufw allow docker-machine ports
     ufw: rule=allow port={{ item }}
-    with_items: [22, 2376, 2377, 4789, 7946]
+    with_items: ["22", "2376", "2377", "4789", "7946"]
+  
+- name: install docker sshfs plugin
+  import_playbook: docker_sshfs_plugin_install.yml
 ...

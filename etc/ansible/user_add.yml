@@ -1,0 +1,19 @@
+---
+- hosts: all
+  strategy: free
+  vars:
+    new_user: skp
+    new_pass: skp
+  tasks:
+  - name: add user
+    become: yes
+    user:
+      name: "{{ new_user }}"
+      uid: 2222
+      password: "{{ new_pass | password_hash('sha512') }}"
+      group: sudo
+      shell: /bin/bash
+      skeleton: /etc/skel
+      append: yes
+
+...

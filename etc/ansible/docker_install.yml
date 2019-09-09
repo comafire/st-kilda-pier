@@ -1,0 +1,78 @@
+---
+- hosts: all
+  strategy: free
+  vars:
+    user: "{{ lookup('env', 'USER') }}"
+    docker_ver: 5:19.03.2~3-0~ubuntu-bionic
+    docker_compose_ver: 1.24.1
+    docker_machine_ver: 0.16.0
+    
+  tasks:
+  - name: debug 
+    debug:
+      msg: >
+        "user: {{ user }},
+          ansible_distribution: {{ ansible_distribution }},  
+          ansible_distribution_release: {{ ansible_distribution_release }}"
+    tags:
+      - debug
+  - name: install aptitude using apt
+    apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+  - name: install required system packages
+    apt: name={{ item }} state=latest update_cache=yes
+    with_items: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+  - name: add Docker GPG apt Key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: add Docker Repository
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+      state: present
+
+  - name: update apt and install docker-ce={{ docker_ver }}
+    apt: update_cache=yes name=docker-ce={{ docker_ver }} state=present
+
+  - name: install Docker Module for Python
+    pip: name=docker executable=pip3
+
+  - name: add docker group
+    group: name=docker state=present
+
+  - name: adding existing user '{{ user }}' to group sudo
+    user: name='{{ user }}' groups=docker append=yes
+
+  - name: restart docker service
+    service: name=docker state=started
+
+  - name: install Docker Compose (if configured).
+    get_url:
+      url: https://github.com/docker/compose/releases/download/{{ docker_compose_ver }}/docker-compose-{{ ansible_system }}-{{ ansible_machine }}
+      dest: /usr/local/bin/docker-compose
+      owner: root
+      group: root        
+      mode: 0755
+
+  - name: download docker-machine binary.
+    get_url:
+      url: https://github.com/docker/machine/releases/download/v{{ docker_machine_ver }}/docker-machine-{{ ansible_system }}-{{ ansible_machine }}
+      dest: /usr/local/bin/docker-machine
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: install docker-machine bash completion.
+    get_url:
+      url: https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker
+      dest: /etc/bash_completion.d/docker
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: ufw allow docker-machine ports
+    ufw: rule=allow port={{ item }}
+    with_items: [22, 2376, 2377, 4789, 7946]
+...

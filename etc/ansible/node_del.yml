@@ -1,0 +1,17 @@
+---
+- hosts: all
+  strategy: free
+  vars:
+    home: "{{ lookup('env', 'HOME') }}"
+    pri_key: "{{ home }}/.ssh/id_rsa"
+    pub_key: "{{ lookup('file', '{{ home }}/.ssh/id_rsa.pub') }}"
+  tasks:
+    - name: /etc/hosts
+      become: yes
+      lineinfile:
+        path: "/etc/hosts"
+        line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].inventory_hostname }}"
+        state: absent
+      with_items: "{{ groups['all'] }}"
+
+...

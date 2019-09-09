@@ -1,0 +1,15 @@
+---
+- hosts: all
+  strategy: free
+  vars:
+    new_user: skp
+    new_pass: skp
+  tasks:
+  - name: add user
+    become: yes
+    user:
+      name: "{{ new_user }}"
+      state: absent
+      remove: yes
+
+...

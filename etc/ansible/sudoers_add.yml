@@ -1,0 +1,13 @@
+---
+- hosts: all
+  vars:
+    user: "{{ lookup('env', 'USER') }}"
+  tasks:
+  - name: /etc/sudoers
+    become: yes
+    lineinfile:
+      path: "/etc/sudoers"
+      line: "{{ user }} ALL=(ALL) NOPASSWD:ALL"
+      validate: "/usr/sbin/visudo -cf %s"
+
+...

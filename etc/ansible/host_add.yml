@@ -1,0 +1,12 @@
+---
+- hosts: all
+  vars:
+  tasks:
+  - name: /etc/hosts
+    become: yes
+    lineinfile:
+      path: "/etc/hosts"
+      line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].inventory_hostname }}"
+    with_items: "{{ groups['all'] }}"
+
+...

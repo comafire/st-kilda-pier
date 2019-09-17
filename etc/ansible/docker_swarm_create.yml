@@ -1,0 +1,49 @@
+---
+- hosts: all
+  become: true
+  environment:
+  vars:
+    swarm_leader: "{{ groups['swarm_managers'] | first }}"
+    swarm_managers: "{{ groups['swarm_managers'] }}"
+    swarm_workers: "{{ groups['swarm_workers'] }}"
+    swarm_addr: "{{ hostvars[swarm_leader].ansible_host }}"
+    
+  tasks:
+  - name: init a new swarm with default parameters
+    docker_swarm:
+      state: present
+      advertise_addr: "{{ hostvars[swarm_leader].ansible_host }}"      
+    register: swarm_leader_facts
+    when: inventory_hostname == swarm_leader
+
+  - name: get swarm manager join-token
+    command: "docker swarm join-token -q manager"
+    changed_when: false
+    register: swarm_manager_token
+    delegate_to: "{{ swarm_leader }}"
+    delegate_facts: true
+
+  - name: get swarm worker join-token
+    command: "docker swarm join-token -q worker"
+    changed_when: false
+    register: swarm_worker_token
+    delegate_to: "{{ swarm_leader }}"
+    delegate_facts: true
+
+  - name: add swarm managers
+    docker_swarm:
+      state: join
+      advertise_addr: "{{ ansible_host }}"
+      join_token: "{{ swarm_manager_token.stdout }}"
+      remote_addrs: [ "{{ hostvars[swarm_leader].ansible_host }}" ]
+    when: inventory_hostname in swarm_managers
+    
+  - name: add swarm workers
+    docker_swarm:
+      state: join
+      advertise_addr: "{{ ansible_host }}"
+      join_token: "{{ swarm_worker_token.stdout }}"
+      remote_addrs: "{{ swarm_managers }}"
+    when: inventory_hostname in swarm_workers
+            
+...

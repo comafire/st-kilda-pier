@@ -8,14 +8,6 @@
     docker_machine_ver: 0.16.0
     
   tasks:
-  - name: debug 
-    debug:
-      msg: >
-        "user: {{ user }},
-          ansible_distribution: {{ ansible_distribution }},  
-          ansible_distribution_release: {{ ansible_distribution_release }}"
-    tags:
-      - debug
   - name: install aptitude using apt
     apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
 
@@ -23,12 +15,12 @@
     apt: name={{ item }} state=latest update_cache=yes
     with_items: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
 
-  - name: add Docker GPG apt Key
+  - name: add docker gpg apt key
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
       state: present
 
-  - name: add Docker Repository
+  - name: add docker repository
     apt_repository:
       repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
       state: present
@@ -36,7 +28,7 @@
   - name: update apt and install docker-ce={{ docker_ver }}
     apt: update_cache=yes name=docker-ce={{ docker_ver }} state=present
 
-  - name: install Docker Module for Python
+  - name: install docker module for python
     pip: name=docker executable=pip3
 
   - name: add docker group
@@ -48,7 +40,7 @@
   - name: restart docker service
     service: name=docker state=started
 
-  - name: install Docker Compose (if configured).
+  - name: install docker-compose
     get_url:
       url: https://github.com/docker/compose/releases/download/{{ docker_compose_ver }}/docker-compose-{{ ansible_system }}-{{ ansible_machine }}
       dest: /usr/local/bin/docker-compose
@@ -56,7 +48,7 @@
       group: root        
       mode: 0755
 
-  - name: download docker-machine binary.
+  - name: download docker-machine 
     get_url:
       url: https://github.com/docker/machine/releases/download/v{{ docker_machine_ver }}/docker-machine-{{ ansible_system }}-{{ ansible_machine }}
       dest: /usr/local/bin/docker-machine
@@ -64,7 +56,7 @@
       group: root
       mode: 0755
 
-  - name: install docker-machine bash completion.
+  - name: install docker-machine bash completion
     get_url:
       url: https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker
       dest: /etc/bash_completion.d/docker
@@ -78,4 +70,5 @@
   
 - name: install docker sshfs plugin
   import_playbook: docker_sshfs_plugin_install.yml
+
 ...

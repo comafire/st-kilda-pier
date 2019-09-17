@@ -31,13 +31,9 @@ Vagrant.configure("2") do |config|
     
     # Install ansible, sshpass, invoke
     host.vm.provision "shell", inline: "apt-get update"
-    host.vm.provision "shell", inline: "apt-get install -y software-properties-common"
-    host.vm.provision "shell", inline: "apt-get install -y python-pip sshpass"
-    host.vm.provision "shell", inline: "pip install invoke"
-    host.vm.provision "shell", inline: "apt-add-repository --yes --update ppa:ansible/ansible"
-    host.vm.provision "shell", inline: "apt-get install -y ansible"
-    host.vm.provision "shell", inline: "sed -i -e 's/#host_key_checking = False/host_key_checking = False/g' /etc/ansible/ansible.cfg"
-    host.vm.provision "shell", inline: "sed -i -e 's/#deprecation_warnings = True/deprecation_warnings = False/g' /etc/ansible/ansible.cfg"
+    host.vm.provision "shell", inline: "apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
+    host.vm.provision "shell", inline: "apt-get install -y python3 python3-pip python3-setuptools virtualenv sshpass"
+    host.vm.provision "shell", inline: "pip3 install invoke ansible"
   end
 
   (1..n_nodes).each do |i|

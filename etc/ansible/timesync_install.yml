@@ -9,42 +9,42 @@
     fallback_ntp: "0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org"
 
   tasks:
-    # TIME
-    - name: set timezone
-      file:
-        state: link
-        src: /usr/share/zoneinfo/{{ timesync_timezone }}
-        dest: /etc/localtime
-        force: yes
-    - name: lineinfile ntp
-      lineinfile:
-        dest: /etc/systemd/timesyncd.conf
-        state: present
-        regexp: '^#NTP='
-        line: "NTP={{ ntp }}"
-    - name: lineinfile fallback_ntp
-      lineinfile:
-        dest: /etc/systemd/timesyncd.conf
-        state: present
-        regexp: '#FallbackNTP='
-        line: "FallbackNTP={{ fallback_ntp }}"
-    - name: replace RootDistanceMaxSec
-      replace:
-        path: /etc/systemd/timesyncd.conf
-        regexp: '^#RootDistanceMaxSec=5'
-        replace: 'RootDistanceMaxSec=5'
-    - name: replace PollIntervalMinSec
-      replace:
-        path: /etc/systemd/timesyncd.conf
-        regexp: '^#PollIntervalMinSec=32'
-        replace: 'PollIntervalMinSec=32'
-    - name: replace PollIntervalMaxSec
-      replace:
-        path: /etc/systemd/timesyncd.conf
-        regexp: '^#PollIntervalMaxSec=2048'
-        replace: 'PollIntervalMaxSec=2048'
-    - name: Start and enable systemd-timesyncd
-      service:
-        name: systemd-timesyncd.service
-        enabled: yes
-        state: started
+  # TIME
+  - name: set timezone
+    file:
+      state: link
+      src: /usr/share/zoneinfo/{{ timesync_timezone }}
+      dest: /etc/localtime
+      force: yes
+  - name: lineinfile ntp
+    lineinfile:
+      dest: /etc/systemd/timesyncd.conf
+      state: present
+      regexp: '^#NTP='
+      line: "NTP={{ ntp }}"
+  - name: lineinfile fallback_ntp
+    lineinfile:
+      dest: /etc/systemd/timesyncd.conf
+      state: present
+      regexp: '#FallbackNTP='
+      line: "FallbackNTP={{ fallback_ntp }}"
+  - name: replace RootDistanceMaxSec
+    replace:
+      path: /etc/systemd/timesyncd.conf
+      regexp: '^#RootDistanceMaxSec=5'
+      replace: 'RootDistanceMaxSec=5'
+  - name: replace PollIntervalMinSec
+    replace:
+      path: /etc/systemd/timesyncd.conf
+      regexp: '^#PollIntervalMinSec=32'
+      replace: 'PollIntervalMinSec=32'
+  - name: replace PollIntervalMaxSec
+    replace:
+      path: /etc/systemd/timesyncd.conf
+      regexp: '^#PollIntervalMaxSec=2048'
+      replace: 'PollIntervalMaxSec=2048'
+  - name: Start and enable systemd-timesyncd
+    service:
+      name: systemd-timesyncd.service
+      enabled: yes
+      state: started

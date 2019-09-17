@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: true
+  environment:
+  vars:
+    
+  tasks:
+  - name: leave swarm manager
+    docker_swarm:
+      state: absent
+      force: true
+            
+...

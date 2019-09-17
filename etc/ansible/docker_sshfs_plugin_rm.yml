@@ -1,6 +1,7 @@
 ---
 - hosts: all
-  
+  become: yes
+
   tasks:
   - name: disable docker sshfs plugin
     shell: "docker plugin disable vieux/sshfs"

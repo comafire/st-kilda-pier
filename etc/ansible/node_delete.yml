@@ -1,0 +1,4 @@
+---
+- name: delete host
+  import_playbook: host_delete.yml
+...
